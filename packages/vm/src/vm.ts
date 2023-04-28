@@ -1,10 +1,19 @@
-import { createContext } from 'vm';
+import { createContext, runInContext } from 'vm';
 
 export class VM{
   public context: VMContext;
 
   constructor() {
-    this.context = {};
+    this.context = createContext(
+      {},
+      {
+        name: 'my-edge-runtime',
+      }
+    ) as VMContext;
+  }
+
+  public evaluate(code: string) {
+    return runInContext(code, this.context);
   }
 }
 

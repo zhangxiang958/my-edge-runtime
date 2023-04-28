@@ -1,9 +1,2 @@
-import { createContext } from 'vm';
+export { VM } from './vm';
 
-export class VM{
-  
-
-  constructor() {
-    
-  }
-}

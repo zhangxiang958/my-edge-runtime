@@ -1,12 +1,20 @@
-import { VM } from "./vm";
+import { VM, VMContext, VMOptions } from "./vm";
 
-export interface EdgeRuntimeOptions {
+export interface EdgeRuntimeOptions extends VMOptions {
   initialCode?: string
 }
 
 export class EdgeRuntime extends VM {
   constructor (options?: EdgeRuntimeOptions) {
-    super();
+    super({
+      ...options,
+      extend: (context) => {
+        if (options?.extend) {
+          return options.extend(addBuiltin(context));
+        }
+        return addBuiltin(context);
+      }
+    });
 
     this.evaluate(getBuiltinEventListenersCode());
     if (options?.initialCode) {
@@ -26,12 +34,22 @@ function getBuiltinEventListenersCode(): string {
 
   function addEventListener(type, hanlder) {
     const eventType = type.toLowerCase();
-    if (eventType === 'fetch' && self.__listerners.fetch) {
+    if (eventType === 'fetch' && self.__listeners.fetch) {
       throw new TypeError('event "fetch" just can register one hanlder');
     }
 
     self.__listeners[eventType] = self.__listeners[eventType] || [];
-    self.__listeners[eventType].push(handler);
+    self.__listeners[eventType].push(hanlder);
   }
   `;
+}
+
+function addBuiltin(context: VMContext): VMContext {
+  Object.defineProperty(context, 'self', {
+    configurable: false,
+    enumerable: true,
+    value: context,
+    writable: true
+  });
+  return context;
 }

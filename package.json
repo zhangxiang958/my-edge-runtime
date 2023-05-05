@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npx jest",
-    "test:jest:configInit": "npx ts-jest config:init"
+    "test:jest:configInit": "npx ts-jest config:init",
+    "edge-runtime": "npx ts-node packages/runtime/src/index.ts"
   },
   "keywords": [],
   "author": "",

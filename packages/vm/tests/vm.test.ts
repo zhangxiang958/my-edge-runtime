@@ -6,4 +6,3 @@ it('creates a VM with empty context', () => {
     expect(vm.context).toStrictEqual({ foo: 'bar' });
 });
 
-it('allow');

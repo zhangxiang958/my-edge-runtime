@@ -4,7 +4,14 @@ export interface EdgeRuntimeOptions extends VMOptions {
   initialCode?: string
 }
 
+interface DispatchFetch {
+  (input: string, init?: RequestInit): Promise<Response & {
+    waitUnit: () => Promise<any>
+  }>
+}
+
 export class EdgeRuntime extends VM {
+  public readonly dispatchFetch: DispatchFetch;
   constructor (options?: EdgeRuntimeOptions) {
     super({
       ...options,
@@ -17,6 +24,7 @@ export class EdgeRuntime extends VM {
     });
 
     this.evaluate(getBuiltinEventListenersCode());
+    this.dispatchFetch = this.evaluate(getDispatchFetchCode());
     if (options?.initialCode) {
       this.evaluate(options.initialCode);
     }
@@ -41,6 +49,16 @@ function getBuiltinEventListenersCode(): string {
     self.__listeners[eventType] = self.__listeners[eventType] || [];
     self.__listeners[eventType].push(hanlder);
   }
+  `;
+}
+
+function getDispatchFetchCode(): string {
+  return `
+  (async function dispatchFetch(url, init) {
+    const req = new Request(url, init);
+    const event = new FetchEvent(req);
+    return new Response();
+  })
   `;
 }
 

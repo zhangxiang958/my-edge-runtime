@@ -2,6 +2,7 @@ import path from 'path';
 import { readFileSync } from 'fs';
 
 import { EdgeRuntime } from '../../vm/src/runtime';
+import { runServer } from './runServer';
 
 async function main() {
   const [_, edgeFunctionScriptPath] = process.argv.slice(1);
@@ -11,13 +12,15 @@ async function main() {
 
   const absEdgeFunctionPath = path.resolve(process.cwd(), edgeFunctionScriptPath);
   const initialCode = readFileSync(absEdgeFunctionPath, 'utf-8');
-  console.log(initialCode);
 
   const runtime = new EdgeRuntime({
     initialCode
   });
 
-  runtime.evaluate('');
+  // runtime.evaluate('');
+  await runServer({
+    runtime
+  });
 }
 
 main().catch(err => {

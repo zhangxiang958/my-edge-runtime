@@ -59,7 +59,6 @@ function getBuiltinEventListenersCode(): string {
 function getDispatchFetchCode(): string {
   return `
   (async function dispatchFetch(url, init) {
-    console.log(Request);
     const req = new Request(url, init);
     const event = new FetchEvent(req);
 
@@ -125,6 +124,7 @@ function addBuiltin(context: VMContext): VMContext {
     process,
     global: {},
     TextEncoder,
+    TextDecoder,
     AbortSignal,
   });
   const requestModulePath = path.resolve(__dirname, '../../builtin/request.js');
@@ -136,7 +136,16 @@ function addBuiltin(context: VMContext): VMContext {
     value: requestModule.Request,
     writable: true
   });
-  console.log(context.Request);
+
+  const urlModulePath = path.resolve(__dirname, '../../builtin/url.js');
+  const urlModule = contextRequire.call(null, urlModulePath, urlModulePath);
+  Object.defineProperty(context, 'URL', {
+    configurable: false,
+    enumerable: false,
+    value: urlModule.URL,
+    writable: true
+  });
+
   return context;
 }
 

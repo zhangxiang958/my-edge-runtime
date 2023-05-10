@@ -24,7 +24,7 @@ export function createRequire(
     };
 
     let fn = runInContext(`
-    (function (exports, require, module, __filename, __dirname) {
+    (function (exports, require, module, __filename, __dirname, ${Object.keys(scopedContext).join(', ')}) {
       ${readFileSync(resolved, 'utf-8')}
     })
     `, context);
@@ -36,6 +36,7 @@ export function createRequire(
         module,
         resolved,
         path.dirname(resolved),
+        ...Object.values(scopedContext)
       );
     }catch (err) {
       cache.delete(resolved);

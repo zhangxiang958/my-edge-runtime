@@ -110,12 +110,15 @@ function addBuiltin(context: VMContext): VMContext {
     ['perf_hooks', {
       exports: require('perf_hooks')
     }],
-    ['util/types', {
+    ['util/types', { // request 里面需要用到
       exports: require('util/types')
     }],
     ['events', {
       exports: require('events')
     }],
+    ['tr46', { // url 里面需要用到
+      exports: require('tr46')
+    }]
   ]);
 
   const contextRequire = createRequire(context, requireCache, undefined, {
@@ -143,6 +146,24 @@ function addBuiltin(context: VMContext): VMContext {
     configurable: false,
     enumerable: false,
     value: urlModule.URL,
+    writable: true
+  });
+
+  const abortControllerModulePath = path.resolve(__dirname, '../../builtin/abort-controller.js');
+  const abortControllerModule = contextRequire.call(null, abortControllerModulePath, abortControllerModulePath);
+  Object.defineProperty(context, 'AbortController', {
+    configurable: false,
+    enumerable: false,
+    value: abortControllerModule.AbortController,
+    writable: true
+  });
+
+  const fetchEventModulePath = path.resolve(__dirname, '../../builtin/fetchEvent.js');
+  const fetchEventModule = contextRequire.call(null, fetchEventModulePath, fetchEventModulePath);
+  Object.defineProperty(context, 'FetchEvent', {
+    configurable: false,
+    enumerable: false,
+    value: fetchEventModule.FetchEvent,
     writable: true
   });
 

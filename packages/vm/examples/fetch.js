@@ -57,5 +57,5 @@ async function fetchRequest(url) {
 addEventListener('fetch', event => {
   const { searchParams } = new URL(event.request.url);
   const url = searchParams.get('url') || 'https://rumt-zh.com';
-  return event.responseWith(fetchRequest(url));
+  return event.respondWith(fetchRequest(url));
 });

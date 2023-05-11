@@ -26,7 +26,10 @@ export function createHandler(options: CreateHanlderOptions) {
           body: undefined
         }
       );
-      console.log(response);
+
+      res.statusCode = response.status;
+      res.statusMessage = response.statusText;
+      res.end();
     },
     waitUnit: () => Promise.all([])
   }

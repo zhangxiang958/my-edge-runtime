@@ -62,6 +62,26 @@ function getDispatchFetchCode(): string {
     const req = new Request(url, init);
     const event = new FetchEvent(req);
 
+    const getResponse = ({ response, error }) => {
+      if (error || !response || !(response instanceof Response)) {
+        console.error(error ? error.toString() : 'The event listener did not respond')
+        response = new Response(null, {
+          statusText: 'Internal Server Error',
+          status: 500
+        })
+      }
+
+      response.waitUntil = () => Promise.all(event.awaiting);
+
+      if (response.status < 300 || response.status >= 400 ) {
+        response.headers.delete('content-encoding');
+        response.headers.delete('transform-encoding');
+        response.headers.delete('content-length');
+      }
+
+      return response;
+    }
+
     try {
       await self.__listeners.fetch[0].call(event, event)
     } catch (error) {
@@ -118,6 +138,12 @@ function addBuiltin(context: VMContext): VMContext {
     }],
     ['tr46', { // url 里面需要用到
       exports: require('tr46')
+    }],
+    ['stream/web', { // fetch 需要用到
+      exports: require('stream/web')
+    }],
+    ['zlib', { // fetch 需要用到
+      exports: require('zlib')
     }]
   ]);
 
@@ -129,6 +155,7 @@ function addBuiltin(context: VMContext): VMContext {
     TextEncoder,
     TextDecoder,
     AbortSignal,
+    console,
   });
   const requestModulePath = path.resolve(__dirname, '../../builtin/request.js');
   const requestModule = contextRequire.call(null, requestModulePath, requestModulePath);
@@ -148,6 +175,12 @@ function addBuiltin(context: VMContext): VMContext {
     value: urlModule.URL,
     writable: true
   });
+  Object.defineProperty(context, 'URLSearchParams', {
+    configurable: false,
+    enumerable: false,
+    value: urlModule.URLSearchParams,
+    writable: true
+  });
 
   const abortControllerModulePath = path.resolve(__dirname, '../../builtin/abort-controller.js');
   const abortControllerModule = contextRequire.call(null, abortControllerModulePath, abortControllerModulePath);
@@ -164,6 +197,38 @@ function addBuiltin(context: VMContext): VMContext {
     configurable: false,
     enumerable: false,
     value: fetchEventModule.FetchEvent,
+    writable: true
+  });
+
+  const fetchModulePath = path.resolve(__dirname, '../../builtin/fetch.js');
+  const fetchModule = contextRequire.call(null, fetchModulePath, fetchModulePath);
+  Object.defineProperty(context, 'fetch', {
+    configurable: false,
+    enumerable: false,
+    value: fetchModule.fetch,
+    writable: true
+  });
+  Object.defineProperty(context, 'Response', {
+    configurable: false,
+    enumerable: false,
+    value: fetchModule.Response,
+    writable: true
+  });
+  Object.defineProperty(context, 'getGlobalDispatcher', {
+    configurable: false,
+    enumerable: false,
+    value: fetchModule.getGlobalDispatcher,
+    writable: true
+  });
+
+
+  // console
+  const consoleModulePath = path.resolve(__dirname, '../../builtin/console.js');
+  const consoleModule = contextRequire.call(null, consoleModulePath, consoleModulePath);
+  Object.defineProperty(context, 'console', {
+    configurable: false,
+    enumerable: false,
+    value: consoleModule.konsole,
     writable: true
   });
 

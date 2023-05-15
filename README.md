@@ -5,3 +5,6 @@
 this project is a demo to learn how the vercel edge runtime work, and lacks a lot of features, so please dont't use it in production.
 
 
+## How Edge Runtime Work
+
+![edge runtime](./docs/images/howEdgeRuntimeWork.png)
